@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CateringQuote — Build professional catering and event quotes in seconds. Live totals, PDF download, and saved history. No API keys required.">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>CateringQuote — Simple Quotes for Catering &amp; Events</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js" defer></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --radius: 14px;
+      --radius-sm: 8px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0a0a0f;
+      --bg-elevated: #12121a;
+      --bg-card: #16161f;
+      --bg-input: #1a1a26;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.16);
+      --text: #f0f0f5;
+      --text-muted: #8b8b9e;
+      --text-faint: #5c5c6e;
+      --accent: #7c5cff;
+      --accent-hover: #9278ff;
+      --accent-glow: rgba(124, 92, 255, 0.35);
+      --accent-soft: rgba(124, 92, 255, 0.12);
+      --success: #34d399;
+      --success-soft: rgba(52, 211, 153, 0.12);
+      --warning: #fbbf24;
+      --danger: #f87171;
+      --danger-soft: rgba(248, 113, 113, 0.12);
+      --pro-gradient: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.3);
+      --overlay: rgba(0, 0, 0, 0.65);
+    }
+
+    [data-theme="light"] {
+      --bg: #f5f5fa;
+      --bg-elevated: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f0f0f6;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.16);
+      --text: #1a1a2e;
+      --text-muted: #5c5c6e;
+      --text-faint: #8b8b9e;
+      --accent: #6d4aff;
+      --accent-hover: #5a38e0;
+      --accent-glow: rgba(109, 74, 255, 0.25);
+      --accent-soft: rgba(109, 74, 255, 0.08);
+      --success: #059669;
+      --success-soft: rgba(5, 150, 105, 0.1);
+      --warning: #d97706;
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.08);
+      --pro-gradient: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+      --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+      --overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, var(--accent-glow), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(236, 72, 153, 0.08), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 24px 20px 64px; }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--pro-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .logo h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .logo p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: -2px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn:hover { border-color: var(--border-hover); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: 50%;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-pro {
+      background: var(--pro-gradient);
+      border: none;
+      color: #fff;
+      font-weight: 600;
+      padding: 10px 20px;
+    }
+
+    .btn-pro:hover { box-shadow: 0 4px 24px rgba(245, 158, 11, 0.35); }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: transparent;
+      color: var(--text-muted);
+    }
+
+    .btn-ghost:hover { color: var(--text); background: var(--accent-soft); }
+
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+    .btn-danger {
+      color: var(--danger);
+      background: var(--danger-soft);
+      border-color: transparent;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+
+    /* Hero */
+    .hero { text-align: center; margin-bottom: 36px; }
+
+    .hero h2 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+
+    .hero h2 span {
+      background: var(--pro-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Forms & fields */
+    .field-label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .field-hint {
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      margin-top: 6px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: var(--text-faint); }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%238b8b9e' viewBox='0 0 16 16'%3E%3Cpath d='M4.646 6.646a.5.5 0 0 1 .708 0L8 9.293l2.646-2.647a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-3-3a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 40px;
+    }
+
+    .form-select option {
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 88px;
+      line-height: 1.5;
+    }
+
+    .form-input[type="number"] { -moz-appearance: textfield; }
+    .form-input[type="number"]::-webkit-outer-spin-button,
+    .form-input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Cards / sections */
+    .section {
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated);
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .section-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .section-body { padding: 20px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    /* Line items */
+    .line-items { display: flex; flex-direction: column; gap: 12px; }
+
+    .line-item {
+      display: grid;
+      grid-template-columns: 1fr 110px 90px 90px 40px;
+      gap: 10px;
+      align-items: end;
+      padding: 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: border-color var(--transition);
+    }
+
+    .line-item:hover { border-color: var(--border-hover); }
+
+    .line-item .field-label { margin-bottom: 6px; font-size: 0.7rem; }
+
+    .line-item .form-input,
+    .line-item .form-select {
+      padding: 10px 12px;
+      font-size: 0.875rem;
+    }
+
+    .line-item-remove {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 8px;
+      align-self: end;
+      margin-bottom: 1px;
+    }
+
+    .line-item-total {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .add-item-row {
+      display: flex;
+      justify-content: flex-start;
+      margin-top: 4px;
+    }
+
+    /* Live totals bar */
+    .totals-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    .total-chip {
+      text-align: center;
+    }
+
+    .total-chip .label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .total-chip .value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .total-chip.grand .value {
+      color: var(--accent);
+      font-size: 1.2rem;
+    }
+
+    /* Generate row */
+    .generate-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 8px 0 28px;
+    }
+
+    .btn-generate {
+      padding: 16px 40px;
+      font-size: 1.05rem;
+      border-radius: var(--radius);
+      min-width: 240px;
+    }
+
+    .btn-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Quote preview */
+    .results { display: none; animation: fadeUp 0.5s ease; }
+    .results.visible { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .results-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .results-toolbar .topic-label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .results-toolbar .topic-label strong { color: var(--text); }
+
+    .toolbar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .quote-preview {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    .quote-preview-inner {
+      padding: 32px 28px;
+      background: #ffffff;
+      color: #1a1a2e;
+    }
+
+    [data-theme="dark"] .quote-preview-inner {
+      /* PDF-friendly light surface even in dark mode */
+      background: #ffffff;
+      color: #1a1a2e;
+    }
+
+    .quote-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e5e5ef;
+    }
+
+    .quote-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quote-brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .quote-brand h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #1a1a2e;
+    }
+
+    .quote-brand p {
+      font-size: 0.8rem;
+      color: #5c5c6e;
+    }
+
+    .quote-meta {
+      text-align: right;
+      font-size: 0.85rem;
+      color: #5c5c6e;
+    }
+
+    .quote-meta .quote-id {
+      font-weight: 700;
+      color: #6d4aff;
+      margin-bottom: 4px;
+    }
+
+    .quote-client {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .quote-client dt {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #8b8b9e;
+      margin-bottom: 2px;
+    }
+
+    .quote-client dd {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .quote-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+    }
+
+    .quote-table th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #f5f5fa;
+      color: #5c5c6e;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border-bottom: 1px solid #e5e5ef;
+    }
+
+    .quote-table th:last-child,
+    .quote-table td:last-child { text-align: right; }
+
+    .quote-table th:nth-child(2),
+    .quote-table td:nth-child(2),
+    .quote-table th:nth-child(3),
+    .quote-table td:nth-child(3) { text-align: right; }
+
+    .quote-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eeeef4;
+      color: #1a1a2e;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quote-table tbody tr:last-child td { border-bottom: none; }
+
+    .quote-totals {
+      margin-left: auto;
+      width: 100%;
+      max-width: 280px;
+      margin-bottom: 24px;
+    }
+
+    .quote-totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 0.9rem;
+      color: #5c5c6e;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .quote-totals-row.grand {
+      border-top: 2px solid #1a1a2e;
+      margin-top: 6px;
+      padding-top: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .quote-notes {
+      padding: 16px;
+      background: #f5f5fa;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      color: #5c5c6e;
+      margin-bottom: 20px;
+    }
+
+    .quote-notes strong {
+      display: block;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .quote-footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #8b8b9e;
+      padding-top: 16px;
+      border-top: 1px solid #eeeef4;
+    }
+
+    /* Recent quotes */
+    .recent-list { display: flex; flex-direction: column; gap: 0; }
+
+    .recent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition);
+      cursor: pointer;
+    }
+
+    .recent-item:last-child { border-bottom: none; }
+    .recent-item:hover { background: var(--accent-soft); }
+
+    .recent-item-info { flex: 1; min-width: 0; }
+
+    .recent-item-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-item-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .recent-item-total {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .recent-item-actions {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      font-size: 0.875rem;
+      animation: toastIn 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toast.success { border-color: var(--success); }
+    .toast.success::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Pro CTA */
+    .pro-cta {
+      text-align: center;
+      margin: 40px 0 0;
+      padding: 28px 24px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border-radius: 16px;
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pro-cta p {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #e2e8f0;
+    }
+
+    .pro-cta p strong { color: #fff; }
+
+    .pro-cta-btn {
+      background: #22c55e;
+      color: #0f172a;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-block;
+      transition: all var(--transition);
+      border: none;
+      font-family: inherit;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .pro-cta-btn:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35);
+    }
+
+    .pro-cta .cross-link {
+      margin-top: 20px;
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+
+    .pro-cta .cross-link a {
+      color: #a78bfa;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .pro-cta .cross-link a:hover {
+      color: #c4b5fd;
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-faint);
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .line-item {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .line-item .li-name { grid-column: 1 / -1; }
+      .line-item .li-remove-wrap {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .totals-bar { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .quote-client { grid-template-columns: 1fr; }
+      .quote-header { flex-direction: column; }
+      .quote-meta { text-align: left; }
+    }
+
+    @media (max-width: 600px) {
+      .app { padding: 16px 16px 48px; }
+      header { margin-bottom: 32px; }
+      .results-toolbar { flex-direction: column; align-items: stretch; }
+      .toolbar-actions { justify-content: stretch; }
+      .toolbar-actions .btn { flex: 1; }
+      .btn-generate { min-width: 100%; width: 100%; }
+      .pro-cta { padding: 24px 18px; }
+      .quote-preview-inner { padding: 22px 16px; }
+      .toast-container { left: 16px; right: 16px; bottom: 16px; }
+      .recent-item { flex-wrap: wrap; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Print / PDF helpers */
+    @media print {
+      body::before { display: none; }
+      .app { max-width: none; padding: 0; }
+      header, .hero, .builder, .generate-row, .results-toolbar,
+      .recent-section, .pro-cta, footer, .toast-container { display: none !important; }
+      .results { display: block !important; }
+      .quote-preview { box-shadow: none; border: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="logo-icon" aria-hidden="true">🍽️</div>
+        <div>
+          <h1>CateringQuote</h1>
+          <p>Simple quotes for catering &amp; events</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-icon" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <section class="hero">
+      <h2>Build a polished <span>catering quote</span></h2>
+      <p>Add menu items, set tax &amp; service fees, and export a clean PDF — ready to send to clients.</p>
+    </section>
+
+    <div class="builder">
+      <!-- Event details -->
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">
+            <span>📋</span> Event Details
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div class="full">
+              <label class="field-label" for="clientName">Client / Event name</label>
+              <input class="form-input" id="clientName" type="text" placeholder="e.g. Johnson Wedding Reception" autocomplete="off">
+            </div>
+            <div>
+              <label class="field-label" for="eventDate">Event date</label>
+              <input class="form-input" id="eventDate" type="date">
+            </div>
+            <div>
+              <label class="field-label" for="guestCount">Number of guests</label>
+              <input class="form-input" id="guestCount" type="number" min="0" step="1" placeholder="e.g. 75" value="50">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Menu items -->
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">
+            <span>🍴</span> Menu Items
+            <span class="section-badge" id="itemCountBadge">1</span>
+          </div>
+          <button type="button" class="btn btn-sm btn-ghost" id="addItemBtn">+ Add item</button>
+        </div>
+        <div class="section-body">
+          <div class="line-items" id="lineItems"></div>
+          <div class="add-item-row" style="margin-top: 12px;">
+            <button type="button" class="btn btn-sm" id="addItemBtnBottom">+ Add line item</button>
+          </div>
+
+          <div class="totals-bar" aria-live="polite">
+            <div class="total-chip">
+              <span class="label">Subtotal</span>
+              <span class="value" id="liveSubtotal">$0.00</span>
+            </div>
+            <div class="total-chip">
+              <span class="label">Tax</span>
+              <span class="value" id="liveTax">$0.00</span>
+            </div>
+            <div class="total-chip">
+              <span class="label">Service fee</span>
+              <span class="value" id="liveService">$0.00</span>
+            </div>
+            <div class="total-chip grand">
+              <span class="label">Grand total</span>
+              <span class="value" id="liveGrand">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fees & notes -->
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">
+            <span>💰</span> Fees &amp; Notes
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="form-grid">
+            <div>
+              <label class="field-label" for="taxPercent">Tax %</label>
+              <input class="form-input" id="taxPercent" type="number" min="0" max="100" step="0.01" value="0" placeholder="0">
+              <p class="field-hint">Optional sales tax rate</p>
+            </div>
+            <div>
+              <label class="field-label" for="servicePercent">Gratuity / service fee %</label>
+              <input class="form-input" id="servicePercent" type="number" min="0" max="100" step="0.01" value="0" placeholder="0">
+              <p class="field-hint">Applied on subtotal</p>
+            </div>
+            <div class="full">
+              <label class="field-label" for="notes">Notes / special requests</label>
+              <textarea class="form-textarea" id="notes" rows="3" placeholder="Dietary needs, setup time, equipment, delivery notes…"></textarea>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="generate-row">
+      <button class="btn btn-primary btn-generate" id="generateBtn">
+        <span class="btn-text" id="generateBtnText">Generate Quote</span>
+      </button>
+    </div>
+
+    <!-- Quote preview -->
+    <section class="results" id="results" aria-live="polite">
+      <div class="results-toolbar">
+        <div class="topic-label">Quote for: <strong id="resultClient">—</strong></div>
+        <div class="toolbar-actions">
+          <button class="btn btn-sm" id="copySummaryBtn" title="Copy quote summary">📋 Copy Quote Summary</button>
+          <button class="btn btn-sm btn-primary" id="downloadPdfBtn" title="Download as PDF">⬇️ Download PDF</button>
+        </div>
+      </div>
+
+      <div class="quote-preview" id="quotePreview">
+        <div class="quote-preview-inner" id="quotePreviewInner">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent quotes -->
+    <section class="section recent-section" id="recentSection">
+      <div class="section-header">
+        <div class="section-title">
+          <span>🕒</span> Recent Quotes
+          <span class="section-badge" id="recentCountBadge">0</span>
+        </div>
+        <button type="button" class="btn btn-sm btn-ghost" id="clearRecentBtn">Clear all</button>
+      </div>
+      <div class="recent-list" id="recentList">
+        <div class="empty-state">
+          <div class="emoji">📄</div>
+          <p>No saved quotes yet. Generate one to see it here.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="pro-cta">
+      <p><strong>Ready for unlimited professional quotes?</strong></p>
+      <a class="pro-cta-btn" href="https://thadventure8.gumroad.com/l/tfoikx" target="_blank" rel="noopener noreferrer">Get CateringQuote Pro →</a>
+      <p class="cross-link">
+        Also in the suite:
+        <a href="https://thadwaugh-dev.github.io/content-spark-simple/" target="_blank" rel="noopener noreferrer">ContentSpark</a>
+        ·
+        <a href="https://thadwaugh-dev.github.io/dailyboost_new2/" target="_blank" rel="noopener noreferrer">DailyBoost</a>
+      </p>
+    </div>
+
+    <footer>
+      CateringQuote &copy; 2026 — Built for caterers &amp; event pros, no API keys required.
+      · Sibling of
+      <a href="https://thadwaugh-dev.github.io/content-spark-simple/" target="_blank" rel="noopener noreferrer">ContentSpark</a>
+      &amp;
+      <a href="https://thadwaugh-dev.github.io/dailyboost_new2/" target="_blank" rel="noopener noreferrer">DailyBoost</a>
+    </footer>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="assertive"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_THEME = 'cateringquote-theme';
+      const STORAGE_RECENT = 'cateringquote-recent';
+      const STORAGE_DRAFT = 'cateringquote-draft';
+      const MAX_RECENT = 12;
+
+      let quoteGenerated = false;
+      let currentQuote = null;
+      let lineItemId = 0;
+
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => document.querySelectorAll(sel);
+
+      /* ---------- Theme ---------- */
+      function initTheme() {
+        const saved = localStorage.getItem(STORAGE_THEME);
+        const theme = saved || 'dark';
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeButton(theme);
+      }
+
+      function updateThemeButton(theme) {
+        const btn = $('#themeToggle');
+        if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+
+      function toggleTheme() {
+        const html = document.documentElement;
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem(STORAGE_THEME, next);
+        updateThemeButton(next);
+      }
+
+      /* ---------- Helpers ---------- */
+      function money(n) {
+        const v = Number(n) || 0;
+        return v.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      }
+
+      function parseNum(v) {
+        const n = parseFloat(v);
+        return isFinite(n) ? n : 0;
+      }
+
+      function formatDate(iso) {
+        if (!iso) return '—';
+        try {
+          const d = new Date(iso + 'T12:00:00');
+          return d.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        } catch {
+          return iso;
+        }
+      }
+
+      function toast(msg, type) {
+        const container = $('#toastContainer');
+        const el = document.createElement('div');
+        el.className = 'toast' + (type === 'success' ? ' success' : '');
+        el.textContent = msg;
+        container.appendChild(el);
+        setTimeout(() => {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s';
+          setTimeout(() => el.remove(), 300);
+        }, 2600);
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function makeQuoteId() {
+        const d = new Date();
+        const y = d.getFullYear().toString().slice(-2);
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const r = Math.floor(Math.random() * 900 + 100);
+        return 'CQ-' + y + m + day + '-' + r;
+      }
+
+      /* ---------- Line items ---------- */
+      function createLineItem(data) {
+        const id = ++lineItemId;
+        const item = {
+          id,
+          name: (data && data.name) || '',
+          pricing: (data && data.pricing) || 'per_person',
+          price: (data && data.price != null) ? data.price : '',
+          qty: (data && data.qty != null) ? data.qty : 1
+        };
+
+        const row = document.createElement('div');
+        row.className = 'line-item';
+        row.dataset.id = String(id);
+        row.innerHTML =
+          '<div class="li-name">' +
+            '<label class="field-label">Item name</label>' +
+            '<input class="form-input li-name-input" type="text" placeholder="e.g. Buffet dinner" value="' + escapeHtml(item.name) + '">' +
+          '</div>' +
+          '<div>' +
+            '<label class="field-label">Pricing</label>' +
+            '<select class="form-select li-pricing">' +
+              '<option value="per_person"' + (item.pricing === 'per_person' ? ' selected' : '') + '>$ / person</option>' +
+              '<option value="flat"' + (item.pricing === 'flat' ? ' selected' : '') + '>Flat fee</option>' +
+            '</select>' +
+          '</div>' +
+          '<div>' +
+            '<label class="field-label">Price</label>' +
+            '<input class="form-input li-price" type="number" min="0" step="0.01" placeholder="0.00" value="' + escapeHtml(item.price) + '">' +
+          '</div>' +
+          '<div>' +
+            '<label class="field-label">Qty</label>' +
+            '<input class="form-input li-qty" type="number" min="0" step="1" placeholder="1" value="' + escapeHtml(item.qty) + '">' +
+            '<div class="line-item-total li-line-total">= $0.00</div>' +
+          '</div>' +
+          '<div class="li-remove-wrap">' +
+            '<button type="button" class="btn btn-sm btn-danger line-item-remove li-remove" title="Remove item" aria-label="Remove item">✕</button>' +
+          '</div>';
+
+        $('#lineItems').appendChild(row);
+
+        row.querySelector('.li-name-input').addEventListener('input', onFormChange);
+        row.querySelector('.li-pricing').addEventListener('change', onFormChange);
+        row.querySelector('.li-price').addEventListener('input', onFormChange);
+        row.querySelector('.li-qty').addEventListener('input', onFormChange);
+        row.querySelector('.li-remove').addEventListener('click', function () {
+          const rows = $$('.line-item');
+          if (rows.length <= 1) {
+            toast('At least one line item is required');
+            return;
+          }
+          row.remove();
+          onFormChange();
+        });
+
+        updateItemCount();
+        return row;
+      }
+
+      function updateItemCount() {
+        const n = $$('.line-item').length;
+        const badge = $('#itemCountBadge');
+        if (badge) badge.textContent = String(n);
+      }
+
+      function getLineItems() {
+        const items = [];
+        $$('.line-item').forEach(function (row) {
+          const name = row.querySelector('.li-name-input').value.trim();
+          const pricing = row.querySelector('.li-pricing').value;
+          const price = parseNum(row.querySelector('.li-price').value);
+          const qty = parseNum(row.querySelector('.li-qty').value);
+          const guests = parseNum($('#guestCount').value);
+          let lineTotal = 0;
+          if (pricing === 'per_person') {
+            lineTotal = price * (guests > 0 ? guests : 0) * (qty > 0 ? qty : 0);
+          } else {
+            lineTotal = price * (qty > 0 ? qty : 0);
+          }
+          items.push({ name, pricing, price, qty, lineTotal });
+
+          const totalEl = row.querySelector('.li-line-total');
+          if (totalEl) {
+            const unit = pricing === 'per_person'
+              ? money(price) + ' × ' + (guests || 0) + ' guests × ' + (qty || 0)
+              : money(price) + ' × ' + (qty || 0);
+            totalEl.textContent = '= ' + money(lineTotal);
+            totalEl.title = unit;
+          }
+        });
+        return items;
+      }
+
+      /* ---------- Calculations ---------- */
+      function calculate() {
+        const items = getLineItems();
+        const subtotal = items.reduce(function (s, it) { return s + it.lineTotal; }, 0);
+        const taxPct = parseNum($('#taxPercent').value);
+        const svcPct = parseNum($('#servicePercent').value);
+        const tax = subtotal * (taxPct / 100);
+        const service = subtotal * (svcPct / 100);
+        const grand = subtotal + tax + service;
+        return { items, subtotal, taxPct, svcPct, tax, service, grand };
+      }
+
+      function updateLiveTotals() {
+        const t = calculate();
+        $('#liveSubtotal').textContent = money(t.subtotal);
+        $('#liveTax').textContent = money(t.tax);
+        $('#liveService').textContent = money(t.service);
+        $('#liveGrand').textContent = money(t.grand);
+        updateItemCount();
+      }
+
+      function onFormChange() {
+        updateLiveTotals();
+        saveDraft();
+        if (quoteGenerated) {
+          $('#generateBtnText').textContent = 'Update Quote';
+        }
+      }
+
+      /* ---------- Build quote object ---------- */
+      function buildQuote() {
+        const t = calculate();
+        const clientName = $('#clientName').value.trim() || 'Untitled Event';
+        const eventDate = $('#eventDate').value;
+        const guests = parseNum($('#guestCount').value);
+        const notes = $('#notes').value.trim();
+        const id = (currentQuote && currentQuote.id) ? currentQuote.id : makeQuoteId();
+        const createdAt = (currentQuote && currentQuote.createdAt) ? currentQuote.createdAt : new Date().toISOString();
+
+        return {
+          id,
+          createdAt,
+          updatedAt: new Date().toISOString(),
+          clientName,
+          eventDate,
+          guests,
+          notes,
+          items: t.items.filter(function (it) { return it.name || it.price > 0; }),
+          subtotal: t.subtotal,
+          taxPct: t.taxPct,
+          svcPct: t.svcPct,
+          tax: t.tax,
+          service: t.service,
+          grand: t.grand
+        };
+      }
+
+      /* ---------- Preview ---------- */
+      function renderPreview(q) {
+        const rows = (q.items.length ? q.items : [{ name: '—', pricing: 'flat', price: 0, qty: 0, lineTotal: 0 }])
+          .map(function (it) {
+            const unitLabel = it.pricing === 'per_person'
+              ? money(it.price) + ' / person'
+              : money(it.price) + ' flat';
+            const qtyLabel = it.pricing === 'per_person'
+              ? (q.guests || 0) + ' guests × ' + (it.qty || 0)
+              : String(it.qty || 0);
+            return (
+              '<tr>' +
+                '<td>' + escapeHtml(it.name || 'Untitled item') + '</td>' +
+                '<td>' + unitLabel + '</td>' +
+                '<td>' + qtyLabel + '</td>' +
+                '<td>' + money(it.lineTotal) + '</td>' +
+              '</tr>'
+            );
+          }).join('');
+
+        const notesBlock = q.notes
+          ? '<div class="quote-notes"><strong>Notes / special requests</strong>' + escapeHtml(q.notes).replace(/\n/g, '<br>') + '</div>'
+          : '';
+
+        const taxRow = q.taxPct > 0
+          ? '<div class="quote-totals-row"><span>Tax (' + q.taxPct + '%)</span><span>' + money(q.tax) + '</span></div>'
+          : '';
+        const svcRow = q.svcPct > 0
+          ? '<div class="quote-totals-row"><span>Service fee (' + q.svcPct + '%)</span><span>' + money(q.service) + '</span></div>'
+          : '';
+
+        $('#quotePreviewInner').innerHTML =
+          '<div class="quote-header">' +
+            '<div class="quote-brand">' +
+              '<div class="quote-brand-icon">🍽️</div>' +
+              '<div><h3>CateringQuote</h3><p>Professional event estimate</p></div>' +
+            '</div>' +
+            '<div class="quote-meta">' +
+              '<div class="quote-id">' + escapeHtml(q.id) + '</div>' +
+              '<div>Prepared ' + escapeHtml(formatDate(q.updatedAt.slice(0, 10))) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<dl class="quote-client">' +
+            '<div><dt>Client / Event</dt><dd>' + escapeHtml(q.clientName) + '</dd></div>' +
+            '<div><dt>Event date</dt><dd>' + escapeHtml(formatDate(q.eventDate)) + '</dd></div>' +
+            '<div><dt>Guests</dt><dd>' + (q.guests || 0) + '</dd></div>' +
+            '<div><dt>Items</dt><dd>' + q.items.length + '</dd></div>' +
+          '</dl>' +
+          '<table class="quote-table">' +
+            '<thead><tr><th>Item</th><th>Rate</th><th>Qty</th><th>Amount</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>' +
+          '<div class="quote-totals">' +
+            '<div class="quote-totals-row"><span>Subtotal</span><span>' + money(q.subtotal) + '</span></div>' +
+            taxRow +
+            svcRow +
+            '<div class="quote-totals-row grand"><span>Grand total</span><span>' + money(q.grand) + '</span></div>' +
+          '</div>' +
+          notesBlock +
+          '<div class="quote-footer-note">Thank you for the opportunity. This quote is valid for 14 days unless otherwise noted.</div>';
+      }
+
+      function generateQuote() {
+        const q = buildQuote();
+        if (!q.items.length) {
+          toast('Add at least one menu item with a name or price');
+          return;
+        }
+        currentQuote = q;
+        quoteGenerated = true;
+        renderPreview(q);
+        $('#resultClient').textContent = q.clientName;
+        $('#results').classList.add('visible');
+        $('#generateBtnText').textContent = 'Update Quote';
+        saveRecent(q);
+        saveDraft();
+        toast('Quote ready', 'success');
+        setTimeout(function () {
+          $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+
+      /* ---------- Copy summary ---------- */
+      function buildSummaryText(q) {
+        const lines = [];
+        lines.push('CATERING QUOTE — ' + q.id);
+        lines.push('Client / Event: ' + q.clientName);
+        lines.push('Event date: ' + formatDate(q.eventDate));
+        lines.push('Guests: ' + (q.guests || 0));
+        lines.push('');
+        lines.push('ITEMS');
+        q.items.forEach(function (it, i) {
+          const rate = it.pricing === 'per_person' ? money(it.price) + '/person' : money(it.price) + ' flat';
+          lines.push((i + 1) + '. ' + (it.name || 'Untitled') + ' — ' + rate + ' × qty ' + it.qty + ' = ' + money(it.lineTotal));
+        });
+        lines.push('');
+        lines.push('Subtotal: ' + money(q.subtotal));
+        if (q.taxPct > 0) lines.push('Tax (' + q.taxPct + '%): ' + money(q.tax));
+        if (q.svcPct > 0) lines.push('Service fee (' + q.svcPct + '%): ' + money(q.service));
+        lines.push('GRAND TOTAL: ' + money(q.grand));
+        if (q.notes) {
+          lines.push('');
+          lines.push('Notes: ' + q.notes);
+        }
+        lines.push('');
+        lines.push('Generated with CateringQuote');
+        return lines.join('\n');
+      }
+
+      async function copySummary() {
+        if (!currentQuote) {
+          toast('Generate a quote first');
+          return;
+        }
+        const text = buildSummaryText(currentQuote);
+        try {
+          await navigator.clipboard.writeText(text);
+          toast('Quote summary copied', 'success');
+        } catch {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand('copy');
+            toast('Quote summary copied', 'success');
+          } catch {
+            toast('Could not copy — select text manually');
+          }
+          ta.remove();
+        }
+      }
+
+      /* ---------- PDF ---------- */
+      function downloadPdf() {
+        if (!currentQuote) {
+          toast('Generate a quote first');
+          return;
+        }
+        if (typeof html2pdf === 'undefined') {
+          toast('PDF library still loading — try again in a moment');
+          return;
+        }
+
+        const el = $('#quotePreviewInner');
+        const filename = 'quote-' + currentQuote.id + '.pdf';
+        const opt = {
+          margin: [0.4, 0.4, 0.4, 0.4],
+          filename: filename,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        const btn = $('#downloadPdfBtn');
+        const prev = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Generating…';
+
+        html2pdf().set(opt).from(el).save().then(function () {
+          btn.disabled = false;
+          btn.textContent = prev;
+          toast('PDF downloaded', 'success');
+        }).catch(function () {
+          btn.disabled = false;
+          btn.textContent = prev;
+          toast('PDF generation failed');
+        });
+      }
+
+      /* ---------- Recent quotes ---------- */
+      function loadRecent() {
+        try {
+          const raw = localStorage.getItem(STORAGE_RECENT);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRecent(q) {
+        let list = loadRecent();
+        list = list.filter(function (x) { return x.id !== q.id; });
+        list.unshift({
+          id: q.id,
+          clientName: q.clientName,
+          eventDate: q.eventDate,
+          guests: q.guests,
+          grand: q.grand,
+          updatedAt: q.updatedAt,
+          snapshot: q
+        });
+        if (list.length > MAX_RECENT) list = list.slice(0, MAX_RECENT);
+        localStorage.setItem(STORAGE_RECENT, JSON.stringify(list));
+        renderRecent();
+      }
+
+      function renderRecent() {
+        const list = loadRecent();
+        const container = $('#recentList');
+        const badge = $('#recentCountBadge');
+        if (badge) badge.textContent = String(list.length);
+
+        if (!list.length) {
+          container.innerHTML =
+            '<div class="empty-state">' +
+              '<div class="emoji">📄</div>' +
+              '<p>No saved quotes yet. Generate one to see it here.</p>' +
+            '</div>';
+          return;
+        }
+
+        container.innerHTML = list.map(function (r) {
+          return (
+            '<div class="recent-item" data-id="' + escapeHtml(r.id) + '">' +
+              '<div class="recent-item-info">' +
+                '<div class="recent-item-title">' + escapeHtml(r.clientName) + '</div>' +
+                '<div class="recent-item-meta">' +
+                  escapeHtml(r.id) + ' · ' + escapeHtml(formatDate(r.eventDate)) +
+                  ' · ' + (r.guests || 0) + ' guests' +
+                '</div>' +
+              '</div>' +
+              '<div class="recent-item-total">' + money(r.grand) + '</div>' +
+              '<div class="recent-item-actions">' +
+                '<button type="button" class="btn btn-sm btn-ghost recent-load" title="Load quote">Open</button>' +
+                '<button type="button" class="btn btn-sm btn-danger recent-delete" title="Delete">✕</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join('');
+
+        container.querySelectorAll('.recent-item').forEach(function (el) {
+          const id = el.dataset.id;
+          el.querySelector('.recent-load').addEventListener('click', function (e) {
+            e.stopPropagation();
+            loadQuoteById(id);
+          });
+          el.querySelector('.recent-delete').addEventListener('click', function (e) {
+            e.stopPropagation();
+            deleteRecent(id);
+          });
+          el.addEventListener('click', function () {
+            loadQuoteById(id);
+          });
+        });
+      }
+
+      function deleteRecent(id) {
+        let list = loadRecent().filter(function (x) { return x.id !== id; });
+        localStorage.setItem(STORAGE_RECENT, JSON.stringify(list));
+        renderRecent();
+        toast('Quote removed');
+      }
+
+      function clearRecent() {
+        if (!loadRecent().length) return;
+        if (!confirm('Clear all recent quotes?')) return;
+        localStorage.removeItem(STORAGE_RECENT);
+        renderRecent();
+        toast('Recent quotes cleared');
+      }
+
+      function loadQuoteById(id) {
+        const list = loadRecent();
+        const entry = list.find(function (x) { return x.id === id; });
+        if (!entry || !entry.snapshot) {
+          toast('Quote not found');
+          return;
+        }
+        applyQuoteToForm(entry.snapshot);
+        currentQuote = entry.snapshot;
+        quoteGenerated = true;
+        renderPreview(entry.snapshot);
+        $('#resultClient').textContent = entry.snapshot.clientName;
+        $('#results').classList.add('visible');
+        $('#generateBtnText').textContent = 'Update Quote';
+        updateLiveTotals();
+        toast('Quote loaded', 'success');
+        setTimeout(function () {
+          $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
+
+      function applyQuoteToForm(q) {
+        $('#clientName').value = q.clientName || '';
+        $('#eventDate').value = q.eventDate || '';
+        $('#guestCount').value = q.guests != null ? q.guests : '';
+        $('#taxPercent').value = q.taxPct != null ? q.taxPct : 0;
+        $('#servicePercent').value = q.svcPct != null ? q.svcPct : 0;
+        $('#notes').value = q.notes || '';
+
+        $('#lineItems').innerHTML = '';
+        lineItemId = 0;
+        const items = (q.items && q.items.length) ? q.items : [{ name: '', pricing: 'per_person', price: '', qty: 1 }];
+        items.forEach(function (it) {
+          createLineItem({
+            name: it.name,
+            pricing: it.pricing,
+            price: it.price,
+            qty: it.qty
+          });
+        });
+      }
+
+      /* ---------- Draft ---------- */
+      function saveDraft() {
+        try {
+          const draft = {
+            clientName: $('#clientName').value,
+            eventDate: $('#eventDate').value,
+            guests: $('#guestCount').value,
+            taxPct: $('#taxPercent').value,
+            svcPct: $('#servicePercent').value,
+            notes: $('#notes').value,
+            items: getLineItems().map(function (it) {
+              return { name: it.name, pricing: it.pricing, price: it.price, qty: it.qty };
+            })
+          };
+          localStorage.setItem(STORAGE_DRAFT, JSON.stringify(draft));
+        } catch { /* ignore quota */ }
+      }
+
+      function loadDraft() {
+        try {
+          const raw = localStorage.getItem(STORAGE_DRAFT);
+          if (!raw) return false;
+          const d = JSON.parse(raw);
+          $('#clientName').value = d.clientName || '';
+          $('#eventDate').value = d.eventDate || '';
+          $('#guestCount').value = d.guests != null && d.guests !== '' ? d.guests : 50;
+          $('#taxPercent').value = d.taxPct != null && d.taxPct !== '' ? d.taxPct : 0;
+          $('#servicePercent').value = d.svcPct != null && d.svcPct !== '' ? d.svcPct : 0;
+          $('#notes').value = d.notes || '';
+          $('#lineItems').innerHTML = '';
+          lineItemId = 0;
+          const items = (d.items && d.items.length) ? d.items : null;
+          if (items) {
+            items.forEach(function (it) { createLineItem(it); });
+          } else {
+            createLineItem({ name: 'Buffet dinner', pricing: 'per_person', price: 28, qty: 1 });
+            createLineItem({ name: 'Service staff', pricing: 'flat', price: 250, qty: 1 });
+          }
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      /* ---------- Init ---------- */
+      function init() {
+        initTheme();
+
+        $('#themeToggle').addEventListener('click', toggleTheme);
+        $('#generateBtn').addEventListener('click', generateQuote);
+        $('#addItemBtn').addEventListener('click', function () {
+          createLineItem({ name: '', pricing: 'per_person', price: '', qty: 1 });
+          onFormChange();
+        });
+        $('#addItemBtnBottom').addEventListener('click', function () {
+          createLineItem({ name: '', pricing: 'per_person', price: '', qty: 1 });
+          onFormChange();
+        });
+        $('#copySummaryBtn').addEventListener('click', copySummary);
+        $('#downloadPdfBtn').addEventListener('click', downloadPdf);
+        $('#clearRecentBtn').addEventListener('click', clearRecent);
+
+        ['clientName', 'eventDate', 'guestCount', 'taxPercent', 'servicePercent', 'notes'].forEach(function (id) {
+          const el = $('#' + id);
+          if (el) {
+            el.addEventListener('input', onFormChange);
+            el.addEventListener('change', onFormChange);
+          }
+        });
+
+        if (!loadDraft()) {
+          createLineItem({ name: 'Buffet dinner', pricing: 'per_person', price: 28, qty: 1 });
+          createLineItem({ name: 'Dessert station', pricing: 'per_person', price: 8, qty: 1 });
+          createLineItem({ name: 'Service staff', pricing: 'flat', price: 250, qty: 1 });
+          // Sensible defaults for demo
+          if (!$('#clientName').value) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 14);
+            $('#eventDate').value = tomorrow.toISOString().slice(0, 10);
+            $('#taxPercent').value = 8.25;
+            $('#servicePercent').value = 18;
+          }
+        }
+
+        updateLiveTotals();
+        renderRecent();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+</body>
+</html>
